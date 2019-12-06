@@ -1,0 +1,3 @@
+org\keycloak\social\dingtalk\DingTalkIdentityProvider$Endpoint.class
+org\keycloak\social\dingtalk\DingTalkIdentityProvider.class
+org\keycloak\social\dingtalk\DingTalkIdentityProviderFactory.class
