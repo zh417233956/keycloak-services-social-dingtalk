@@ -1,0 +1,14 @@
+<div class="form-group clearfix">
+    <label class="col-md-2 control-label" for="appkey"><span class="required">*</span>{{:: 'Dingtalk App Appid' | translate}}</label>
+    <div class="col-md-6">
+        <input class="form-control" id="appkey" type="text" ng-model="identityProvider.config.appkey" required>
+    </div>
+    <kc-tooltip>{{:: 'dingtalk-appid.tooltip' | translate}}</kc-tooltip>
+</div>
+<div class="form-group clearfix">
+    <label class="col-md-2 control-label" for="appsecret"><span class="required">*</span>{{:: 'Dingtalk App Secret' | translate}}</label>
+    <div class="col-md-6">
+        <input class="form-control" id="appsecret" kc-password ng-model="identityProvider.config.appsecret" required>
+    </div>
+    <kc-tooltip>{{:: 'dingtalk-secret.tooltip' | translate}}</kc-tooltip>
+</div>
