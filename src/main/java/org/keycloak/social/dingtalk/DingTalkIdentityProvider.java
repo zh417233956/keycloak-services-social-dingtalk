@@ -51,6 +51,7 @@ public class DingTalkIdentityProvider extends AbstractOAuth2IdentityProvider<OAu
     public static final String TOKEN_URL = "https://oapi.dingtalk.com/gettoken";
     public static final String DEFAULT_SCOPE = "snsapi_login";
 
+
     public static final String API_User = "https://oapi.dingtalk.com/sns/getuserinfo_bycode";
 
     public static final String DING_AUTH_URL = "https://open.weixin.qq.com/connect/oauth2/authorize";
@@ -76,6 +77,8 @@ public class DingTalkIdentityProvider extends AbstractOAuth2IdentityProvider<OAu
     private static DefaultCacheManager _cacheManager;
     public static String DING_WORK_CACHE_NAME = "dingtalk_work_sso";
     public static Cache<String, String> sso_cache = get_cache();
+    private String USER_INFO_URL_KEY = "userInfoUrl";
+    public String USER_INFO_URL = "action=get_userid_by_unionid&unionid=UNIONID";
 
 
     public DingTalkIdentityProvider(KeycloakSession session, OAuth2IdentityProviderConfig config) {
@@ -178,7 +181,9 @@ public class DingTalkIdentityProvider extends AbstractOAuth2IdentityProvider<OAu
 //        String accessToken = extractTokenFromResponse(response, getAccessTokenResponseParameter());
 //        String accessToken = getJsonProperty(response, getAccessTokenResponseParameter());
         if (accessToken == null) {
-            throw new IdentityBrokerException("No access token available in OAuth server response");
+            if (getConfig().getConfig().get(USER_INFO_URL_KEY).indexOf(("http")) < 0) {
+                throw new IdentityBrokerException("No access token available in OAuth server response");
+            }
         }
         BrokeredIdentityContext context = null;
         try {
@@ -199,14 +204,29 @@ public class DingTalkIdentityProvider extends AbstractOAuth2IdentityProvider<OAu
 
 //                logger.info("4.1.dingtalk:获取用户userid信息");
                 //获取userid信息
-                String url = PROFILE_URL.replace("ACCESS_TOKEN", accessToken).replace("UNIONID", unionid);
-                JsonNode userfile = SimpleHttp.doGet(url, session).asJson();
                 String user_id = unionid;
-                String user_errcode = getJsonProperty(userfile, "errcode");
-                if (user_errcode == "0") {
-                    user_id = getJsonProperty(userfile, "userid");
+
+                if (getConfig().getConfig().get(USER_INFO_URL_KEY).indexOf(("http")) < 0) {
+                    //从钉钉获取userid
+                    String url = PROFILE_URL.replace("ACCESS_TOKEN", accessToken).replace("UNIONID", unionid);
+                    JsonNode userfile = SimpleHttp.doGet(url, session).asJson();
+                    String user_errcode = getJsonProperty(userfile, "errcode");
+                    if (user_errcode == "0") {
+                        user_id = getJsonProperty(userfile, "userid");
+                    } else {
+                        logger.error("获取钉钉用户信息失败，" + userfile.toString());
+                    }
                 } else {
-                    logger.error("获取钉钉用户信息失败，" + userfile.toString());
+                    //从自己的接口获取用户信息
+                    String urlAPIHost = getConfig().getConfig().get(USER_INFO_URL_KEY);
+                    String url = urlAPIHost + "?" + USER_INFO_URL.replace("UNIONID", unionid);
+                    JsonNode userfile = SimpleHttp.doGet(url, session).asJson();
+                    String user_errcode = getJsonProperty(userfile, "errcode");
+                    if (user_errcode == "0") {
+                        user_id = getJsonProperty(userfile, "jobnumber");
+                    } else {
+                        logger.error("获取mango用户信息失败，" + userfile.toString());
+                    }
                 }
                 String profile_user_info_str = profile_user_info.toString().replace("}", ",\"userid\":\"" + user_id + "\"}");
                 profile_user_info = asJsonNode(profile_user_info_str);
@@ -402,7 +422,10 @@ public class DingTalkIdentityProvider extends AbstractOAuth2IdentityProvider<OAu
             try {
                 BrokeredIdentityContext federatedIdentity = null;
                 if (authorizationCode != null) {
-                    String access_token = get_access_token();
+                    String access_token = "";
+                    if (getConfig().getConfig().get(USER_INFO_URL_KEY).indexOf(("http")) < 0) {
+                        access_token = get_access_token();
+                    }
 //                    logger.info("3.1.dingtalk:根据code获取UserInfo");
                     //根据code,access_token获取用户的openid及userid
                     federatedIdentity = getFederatedIdentity(access_token, authorizationCode, user_agent_Flag);
