@@ -13,14 +13,14 @@ Keycloak社会化登录-钉钉扫码登录-插件
   * `$ cp themes/base/admin/resources/partials/realm-identity-provider-dingtalk-ext.html _KEYCLOAK_HOME_/themes/base/admin/resources/partials/`
 
 * 修改module.xml
- * `$ cd modules/system/layers/keycloak/org/keycloak/keycloak-services/main/`
- 修改module.xml,在<dependencies>节点中新增
- ```html
- <dependencies>
-        <module name="org.infinispan" services="import"/>
-        ...
-  </dependencies>
- ```
+  * `$ cd modules/system/layers/keycloak/org/keycloak/keycloak-services/main/` 
+  ```xml
+  # 修改module.xml,在<dependencies>节点中新增
+  <dependencies>
+         <module name="org.infinispan" services="import"/>
+         ...
+   </dependencies>
+  ```
 
 启动以后需要填写钉钉扫码登录的key和secret
 
