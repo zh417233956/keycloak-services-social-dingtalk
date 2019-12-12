@@ -3,7 +3,7 @@ package org.keycloak.social.dingtalk;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.net.URLEncoder;
-import java.util.Base64;
+import java.util.*;
 
 import org.infinispan.Cache;
 import org.infinispan.configuration.cache.ConfigurationBuilder;
@@ -39,9 +39,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class DingTalkIdentityProvider extends AbstractOAuth2IdentityProvider<OAuth2IdentityProviderConfig>
@@ -192,7 +189,7 @@ public class DingTalkIdentityProvider extends AbstractOAuth2IdentityProvider<OAu
             //获取openid信息
 //            profile = getUserInfoByCode(authorizationCode).asJson();
             String profileStr = getUserInfoByCode(authorizationCode).asString();
-            profileStr = new String(profileStr.getBytes("gbk"), "utf-8");
+//            profileStr = new String(profileStr.getBytes("gbk"), "utf-8");
 //            logger.info("4.1.dingtalk:profile=" + profileStr);
             profile = asJsonNode(profileStr);
             String errcode = getJsonProperty(profile, "errcode");
