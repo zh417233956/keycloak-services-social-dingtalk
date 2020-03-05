@@ -164,10 +164,14 @@ public class DingTalkIdentityProvider extends AbstractOAuth2IdentityProvider<OAu
         BrokeredIdentityContext user = new BrokeredIdentityContext(
                 (uuionid != null && uuionid.length() > 0 ? uuionid : getJsonProperty(profile, "openid")));
 
+        logger.warn("userid:"+getJsonProperty(profile, "userid"));
+
         user.setUsername(getJsonProperty(profile, "userid"));
         user.setBrokerUserId(getJsonProperty(profile, "userid"));
         user.setModelUsername(getJsonProperty(profile, "userid"));
-        user.setName(getJsonProperty(profile, "nick"));
+//        user.setName(getJsonProperty(profile, "nick"));
+        user.setName(getJsonProperty(profile, "userid"));
+        user.setLastName(getJsonProperty(profile, "userid"));
         user.setIdpConfig(getConfig());
         user.setIdp(this);
         AbstractJsonUserAttributeMapper.storeUserProfileForMapper(user, profile, getConfig().getAlias());
@@ -185,12 +189,12 @@ public class DingTalkIdentityProvider extends AbstractOAuth2IdentityProvider<OAu
         BrokeredIdentityContext context = null;
         try {
             JsonNode profile = null;
-//            logger.info("4.dingtalk:获取用户token信息.");
+            logger.info("4.dingtalk:获取用户token信息.");
             //获取openid信息
 //            profile = getUserInfoByCode(authorizationCode).asJson();
             String profileStr = getUserInfoByCode(authorizationCode).asString();
 //            profileStr = new String(profileStr.getBytes("gbk"), "utf-8");
-//            logger.info("4.1.dingtalk:profile=" + profileStr);
+            logger.info("4.1.dingtalk:profile=" + profileStr);
             profile = asJsonNode(profileStr);
             String errcode = getJsonProperty(profile, "errcode");
             if (errcode == "0") {
